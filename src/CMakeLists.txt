@@ -61,8 +61,7 @@ if(IN_VCI_BUILD)
     # Note: only with SHARED is the library copied to the right place inside OpenFlipper
     vci_add_library(OpenVolumeMesh SHARED ${SOURCE_FILES})
 else(IN_VCI_BUILD)
-    add_library(OpenVolumeMesh ${SOURCE_FILES}
-        OpenVolumeMesh/Core/SmartHandles.cc)
+    add_library(OpenVolumeMesh ${SOURCE_FILES})
 endif(IN_VCI_BUILD)
 
 add_library(OpenVolumeMesh::OpenVolumeMesh ALIAS OpenVolumeMesh)
