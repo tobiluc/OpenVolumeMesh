@@ -74,6 +74,33 @@ TEST_F(TetrahedralMeshBase, SmartHandles_MaxLapsParameter) {
     EXPECT_GE(count_zero, 0);
 }
 
+TEST_F(TetrahedralMeshBase, SmartVertexHandle_TetSpecific)
+{
+    generateTetrahedralMesh(mesh_);
+    for (auto ch : mesh_.cells()) {
+        for (auto vh : ch.vertices()) {
+            EXPECT_HANDLE_EQ(vh.opposite_halfface(ch),
+                mesh_.vertex_opposite_halfface(ch, vh));
+            EXPECT_HANDLE_EQ(vh.opposite_halfface(ch).opposite_vertex(), vh);
+        }
+    }
+}
+
+TEST_F(HexahedralMeshBase, SmartVertexHandle_HexSpecific)
+{
+    is_handle_v<SmartVertexHandle<TetrahedralMeshTopologyKernel>>;
+    generateHexahedralMesh(mesh_);
+    for (auto ch : mesh_.cells()) {
+        for (auto hfh : ch.halffaces()) {
+            EXPECT_HANDLE_EQ(hfh.opposite_halfface_in_cell(),
+                mesh_.opposite_halfface_handle_in_cell(hfh, ch));
+            EXPECT_HANDLE_EQ(hfh.opposite_halfface_in_cell()
+                                .opposite_halfface_in_cell(),
+                hfh);
+        }
+    }
+}
+
 
 #if defined(__cpp_lib_ranges)
 TEST_F(TetrahedralMeshBase, SmartHandles_std_ranges) {

@@ -69,7 +69,7 @@ template <typename Handle>
 void ResourceManager::swap_property_elements(Handle _idx_a, Handle _idx_b)
 {
     static_assert(is_handle_v<Handle>);
-    for (auto &prop: storage_tracker<typename Handle::EntityTag>()) {
+    for (auto &prop: storage_tracker<tag_for_handle_t<Handle>>()) {
         prop->swap(_idx_a.uidx(), _idx_b.uidx());
     }
 }
@@ -78,7 +78,7 @@ template <typename Handle>
 void ResourceManager::copy_property_elements(Handle _idx_a, Handle _idx_b)
 {
     static_assert(is_handle_v<Handle>);
-    for (auto &prop: storage_tracker<typename Handle::EntityTag>()) {
+    for (auto &prop: storage_tracker<tag_for_handle_t<Handle>>()) {
         prop->copy(_idx_a.uidx(), _idx_b.uidx());
     }
 }
@@ -274,7 +274,7 @@ template<typename  Handle>
 void ResourceManager::entity_deleted(Handle _h)
 {
     static_assert(is_handle_v<Handle>);
-    for (auto &prop: storage_tracker<typename Handle::EntityTag>()) {
+    for (auto &prop: storage_tracker<tag_for_handle_t<Handle>>()) {
         prop->delete_element(_h.uidx());
     }
 }

@@ -1028,7 +1028,7 @@ public:
     template<typename Handle>
     bool is_valid(Handle _h) const {
         static_assert(is_handle_v<Handle>);
-        return _h.is_valid() && _h.uidx() < n<typename Handle::EntityTag>();
+        return _h.is_valid() && _h.uidx() < n<tag_for_handle_t<Handle>>();
     }
 
 private:

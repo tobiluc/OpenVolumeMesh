@@ -5,6 +5,21 @@
 
 namespace OpenVolumeMesh {
 
+//----------------------------
+// Forward Declarations
+//----------------------------
+
+class TetrahedralMeshTopologyKernel;
+class HexahedralMeshTopologyKernel;
+class PolyhedralMeshTopologyKernel;
+
+template<class TK> class SmartVertexHandle;
+template<class TK> class SmartEdgeHandle;
+template<class TK> class SmartHalfEdgeHandle;
+template<class TK> class SmartFaceHandle;
+template<class TK> class SmartHalfFaceHandle;
+template<class TK> class SmartCellHandle;
+
 template<class TopoKernel>
 class SmartVertexHandle : public VH {
 public:
@@ -12,6 +27,7 @@ public:
         : VH{_vh}
         , kernel_(_kernel)
     {}
+    using EntityTag = typename VH::EntityTag;
     bool is_valid() const {return kernel_.is_valid(*this);}
     auto adjacent_vertices(int _max_laps = 1) const { return kernel_.vertex_vertices(*this, _max_laps); }
     auto outgoing_halfedges(int _max_laps = 1) const { return kernel_.outgoing_halfedges(*this, _max_laps); }
@@ -23,7 +39,8 @@ public:
     auto cells(int _max_laps = 1) const { return kernel_.vertex_cells(*this, _max_laps); }
     size_t valence() const {return kernel_.valence(*this);}
     bool is_boundary() const {return kernel_.is_boundary(*this);}
-private:
+
+protected:
     TopoKernel const& kernel_;
 };
 
@@ -43,7 +60,7 @@ public:
     auto h1() const { return make_smart(this->halfedge_handle(1), kernel_);}
     size_t valence() const {return kernel_.valence(*this);}
     bool is_boundary() const {return kernel_.is_boundary(*this);}
-private:
+protected:
     TopoKernel const& kernel_;
 };
 
@@ -63,7 +80,7 @@ public:
     auto faces(int _max_laps = 1) const { return kernel_.halfedge_faces(*this, _max_laps); }
     auto cells(int _max_laps = 1) const { return kernel_.halfedge_cells(*this, _max_laps); }
     bool is_boundary() const {return kernel_.is_boundary(*this);}
-private:
+protected:
     TopoKernel const& kernel_;
 };
 
@@ -83,7 +100,7 @@ public:
     auto h1() const { return make_smart(this->halfface_handle(1), kernel_);}
     size_t valence() const {return kernel_.valence(*this);}
     bool is_boundary() const {return kernel_.is_boundary(*this);}
-private:
+protected:
     TopoKernel const& kernel_;
 };
 
@@ -102,7 +119,7 @@ public:
     auto face() const { return make_smart(this->face_handle(), kernel_);}
     auto cell() const { return make_smart(kernel_.incident_cell(*this), kernel_); }
     bool is_boundary() const {return kernel_.is_boundary(*this);}
-private:
+protected:
     TopoKernel const& kernel_;
 };
 
@@ -123,57 +140,80 @@ public:
     size_t valence() const {return kernel_.valence(*this);}
     bool is_boundary() const {return kernel_.is_boundary(*this);}
     size_t n_vertices() const {return kernel_.n_vertices_in_cell(*this);}
-private:
+protected:
     TopoKernel const& kernel_;
 };
 
-template<typename Entity, class TopoKernel>
-struct smart_handle {};
+//--------------------------
+// Tet Smart Handles
+//--------------------------
+class SmartTetVertexHandle;
+class SmartTetHalfFaceHandle;
 
+class SmartTetVertexHandle : public SmartVertexHandle<TetrahedralMeshTopologyKernel>
+{
+public:
+    SmartTetVertexHandle(VH _vh, TetrahedralMeshTopologyKernel const&_kernel) :
+        SmartVertexHandle<TetrahedralMeshTopologyKernel>(_vh, _kernel) {}
+
+    SmartTetHalfFaceHandle opposite_halfface(CH ch) const;
+};
+class SmartTetHalfFaceHandle : public SmartHalfFaceHandle<TetrahedralMeshTopologyKernel>
+{
+public:
+    SmartTetHalfFaceHandle(HFH _hfh, TetrahedralMeshTopologyKernel const&_kernel) :
+        SmartHalfFaceHandle<TetrahedralMeshTopologyKernel>(_hfh, _kernel) {}
+
+    SmartTetVertexHandle opposite_vertex() const;
+};
+
+//--------------------------
+// Hex Smart Handles
+//--------------------------
+class SmartHexHalfFaceHandle : public SmartHalfFaceHandle<HexahedralMeshTopologyKernel>
+{
+public:
+    SmartHexHalfFaceHandle(HFH _hfh, HexahedralMeshTopologyKernel const&_kernel) :
+        SmartHalfFaceHandle<HexahedralMeshTopologyKernel>(_hfh, _kernel) {}
+
+    SmartHexHalfFaceHandle opposite_halfface_in_cell() const;
+};
+
+//------------------------------
+// Smart Handle Type Traits
+//------------------------------
+
+template<typename Entity, class TopoKernel, class Enable = void>
+struct smart_handle {};
 template<typename Entity, class TopoKernel>
 using smart_handle_t = typename smart_handle<Entity,TopoKernel>::type;
 
 template<class TopoKernel>
 struct smart_handle<Entity::Vertex, TopoKernel> { using type = SmartVertexHandle<TopoKernel>;};
-
 template<class TopoKernel>
 struct smart_handle<Entity::Edge, TopoKernel> { using type = SmartEdgeHandle<TopoKernel>;};
-
 template<class TopoKernel>
 struct smart_handle<Entity::HalfEdge, TopoKernel> { using type = SmartHalfEdgeHandle<TopoKernel>;};
-
 template<class TopoKernel>
 struct smart_handle<Entity::Face, TopoKernel> { using type = SmartFaceHandle<TopoKernel>;};
-
 template<class TopoKernel>
 struct smart_handle<Entity::HalfFace, TopoKernel> { using type = SmartHalfFaceHandle<TopoKernel>;};
-
 template<class TopoKernel>
 struct smart_handle<Entity::Cell, TopoKernel> { using type = SmartCellHandle<TopoKernel>;};
 
-template<class TopoKernel>
-auto make_smart(VH _h, TopoKernel const&_kernel) {
-    return SmartVertexHandle{_h, _kernel};
-}
-template<class TopoKernel>
-auto make_smart(EH _h, TopoKernel const&_kernel) {
-    return SmartEdgeHandle{_h, _kernel};
-}
-template<class TopoKernel>
-auto make_smart(HEH _h, TopoKernel const&_kernel) {
-    return SmartHalfEdgeHandle{_h, _kernel};
-}
-template<class TopoKernel>
-auto make_smart(FH _h, TopoKernel const&_kernel) {
-    return SmartFaceHandle{_h, _kernel};
-}
-template<class TopoKernel>
-auto make_smart(HFH _h, TopoKernel const&_kernel) {
-    return SmartHalfFaceHandle{_h, _kernel};
-}
-template<class TopoKernel>
-auto make_smart(CH _h, TopoKernel const&_kernel) {
-    return SmartCellHandle{_h, _kernel};
+// How to set type for evrything deriving from Tet/Hex Kernel?
+
+template<> struct smart_handle<Entity::Vertex, TetrahedralMeshTopologyKernel>
+{using type = SmartTetVertexHandle;};
+template<> struct smart_handle<Entity::HalfFace, TetrahedralMeshTopologyKernel>
+{using type = SmartTetHalfFaceHandle;};
+
+template<> struct smart_handle<Entity::HalfFace, HexahedralMeshTopologyKernel>
+{using type = SmartHexHalfFaceHandle;};
+
+template<class Handle, class TopoKernel>
+auto make_smart(Handle _h, TopoKernel const&_kernel) {
+    return smart_handle_t<tag_for_handle_t<Handle>,TopoKernel>{_h, _kernel};
 }
 
 template<typename MeshT, typename IterT>

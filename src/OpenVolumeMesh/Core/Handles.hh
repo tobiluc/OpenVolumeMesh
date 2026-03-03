@@ -254,22 +254,15 @@ template<> struct handle_for_tag<Entity::Face>     { using type = FH;  };
 template<> struct handle_for_tag<Entity::HalfFace> { using type = HFH; };
 template<> struct handle_for_tag<Entity::Cell>     { using type = CH;  };
 template<> struct handle_for_tag<Entity::Mesh>     { using type = MH;  };
-
-
 template<typename EntityTag>
-using HandleT = typename handle_for_tag<EntityTag>::type;
+using HandleT [[deprecated("use handle_for_tag_t instead")]]
+    = typename handle_for_tag<EntityTag>::type;
 
-template<typename>
-struct is_handle : public std::false_type {};
+template<class Handle> struct tag_for_handle {};
+template<class Handle> using tag_for_handle_t = typename Handle::EntityTag;
 
-template<> struct is_handle<VH>  : public std::true_type {};
-template<> struct is_handle<EH>  : public std::true_type {};
-template<> struct is_handle<HEH> : public std::true_type {};
-template<> struct is_handle<FH>  : public std::true_type {};
-template<> struct is_handle<HFH> : public std::true_type {};
-template<> struct is_handle<CH>  : public std::true_type {};
-template<> struct is_handle<MH>  : public std::true_type {};
-
+template<class Handle>
+struct is_handle : std::is_base_of<detail::HandleBase, Handle> {};
 template<typename Handle>
 inline constexpr bool is_handle_v = is_handle<Handle>::value;
 

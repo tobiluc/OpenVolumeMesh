@@ -5,7 +5,7 @@ namespace OpenVolumeMesh {
 
 template <class Iter, class Handle>
 size_t BoundaryItemIter<Iter, Handle>::n_items() const {
-    return BaseIter::mesh()->template n<typename Handle::EntityTag>();
+    return BaseIter::mesh()->template n<tag_for_handle_t<Handle>>();
 }
 
 template <>

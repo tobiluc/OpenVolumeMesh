@@ -51,6 +51,13 @@ namespace OpenVolumeMesh {
 class OVM_EXPORT TetrahedralMeshTopologyKernel
     : public AddSmartIterators<TetrahedralMeshTopologyKernel, TopologyKernel>
 {
+private:
+    using SVH = smart_handle_t<Entity::Vertex, TetrahedralMeshTopologyKernel>;
+    using SEH = smart_handle_t<Entity::Edge, TetrahedralMeshTopologyKernel>;
+    using SHEH = smart_handle_t<Entity::HalfEdge, TetrahedralMeshTopologyKernel>;
+    using SFH = smart_handle_t<Entity::Face, TetrahedralMeshTopologyKernel>;
+    using SHFH = smart_handle_t<Entity::HalfFace, TetrahedralMeshTopologyKernel>;
+    using SCH = smart_handle_t<Entity::Cell, TetrahedralMeshTopologyKernel>;
 public:
 
     TetrahedralMeshTopologyKernel() = default;
@@ -92,10 +99,10 @@ public:
 
     /// Get the vertex of the halfface's incident cell that is not contained in the halfface hfh.
     /// If the incident cell is invalid (hfh is boundary), returns the invalid vertex handle
-    VertexHandle halfface_opposite_vertex(HalfFaceHandle hfh) const;
+    SVH halfface_opposite_vertex(HalfFaceHandle hfh) const;
 
     /// Get the first halfface of the tet ch that does not contain the vertex vh.
-    HalfFaceHandle vertex_opposite_halfface(CellHandle ch, VertexHandle vh) const;
+    SHFH vertex_opposite_halfface(CellHandle ch, VertexHandle vh) const;
 
 
     VertexHandle collapse_edge(HalfEdgeHandle _heh);

@@ -550,22 +550,22 @@ std::vector<VertexHandle> TetrahedralMeshTopologyKernel::get_cell_vertices(HalfF
     return vhs;
 }
 
-VertexHandle TetrahedralMeshTopologyKernel::halfface_opposite_vertex(HalfFaceHandle hfh) const
+TetrahedralMeshTopologyKernel::SVH TetrahedralMeshTopologyKernel::halfface_opposite_vertex(HalfFaceHandle hfh) const
 {
-    return is_boundary(hfh)? InvalidVertexHandle : get_cell_vertices(hfh)[3];
+    return make_smart(is_boundary(hfh)? InvalidVertexHandle : get_cell_vertices(hfh)[3]);
 }
 
-HalfFaceHandle TetrahedralMeshTopologyKernel::vertex_opposite_halfface(CellHandle ch, VertexHandle vh) const
+TetrahedralMeshTopologyKernel::SHFH TetrahedralMeshTopologyKernel::vertex_opposite_halfface(CellHandle ch, VertexHandle vh) const
 {
     for (HalfFaceHandle hfh : cell(ch).halffaces())
     {
         const auto& vhs = get_halfface_vertices(hfh);
         if (vhs[0] != vh && vhs[1] != vh && vhs[2] != vh)
         {
-            return hfh;
+            return make_smart(hfh);
         }
     }
-    return InvalidHalfFaceHandle;
+    return make_smart(InvalidHalfFaceHandle);
 }
 
 
