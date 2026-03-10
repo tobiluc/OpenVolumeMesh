@@ -16,7 +16,7 @@ class HandleIndexing : public Parent
 public:
 
     using EntityTagT = EntityTag;
-    using EntityHandleT = HandleT<EntityTagT>;
+    using EntityHandleT = handle_for_tag_t<EntityTagT>;
     using Parent::Parent;
 
     using reference = typename Parent::reference;

@@ -27,7 +27,7 @@ protected:
 public:
     template<typename HandleT>
     auto make_smart(HandleT _h) const {
-        return OpenVolumeMesh::make_smart(_h, *derived());
+        return OpenVolumeMesh::make_smart(_h, derived());
     }
 
     template<typename EntityTag>
